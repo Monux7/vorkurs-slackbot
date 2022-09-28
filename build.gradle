@@ -1,0 +1,46 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group 'de.rwth.informatik.vorkurs.slackbot'
+version '1.0-SNAPSHOT'
+
+java {
+    sourceCompatibility(17)
+    targetCompatibility(17)
+}
+
+mainClassName = "de.rwth.informatik.vorkurs.slackbot.Main"
+
+tasks.register('fatJar', Jar) {
+    archiveClassifier = 'fat'
+
+    manifest {
+        attributes "Main-Class": "$mainClassName"
+    }
+
+    from sourceSets.main.output
+
+    dependsOn configurations.runtimeClasspath
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from {
+        configurations.runtimeClasspath.findAll { it.name.endsWith('jar') }.collect { zipTree(it) }
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation('com.slack.api:bolt-socket-mode:1.22.2')
+    implementation('org.glassfish.tyrus.bundles:tyrus-standalone-client:1.17')
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
+    implementation("org.slf4j:slf4j-simple:1.7.36")
+}
+
+test {
+    useJUnitPlatform()
+}
